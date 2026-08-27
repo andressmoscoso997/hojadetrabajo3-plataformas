@@ -135,7 +135,18 @@ backstage:
         # Ejemplo:
         # - type: url
         #   target: https://github.com/tu-usuario/tu-repo/blob/main/template.yaml
-
+        - type: url
+          target: https://github.com/andressmoscoso997/hojadetrabajo3-plataformas/blob/main/catalog/org.yaml
+          rules:
+            - allow: [User, Group, System]
+        - type: url
+          target: https://github.com/andressmoscoso997/hojadetrabajo3-plataformas/blob/main/golden-path/template.yaml
+          rules:
+            - allow: [Template]
+        - type: url
+          target: https://github.com/andressmoscoso997/hojadetrabajo3-plataformas/blob/main/golden-path-python/template.yaml
+          rules:
+            - allow: [Template]
     kubernetes:
       serviceLocatorMethod:
         type: 'multiTenant'

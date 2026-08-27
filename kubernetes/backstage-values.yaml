@@ -131,7 +131,7 @@ backstage:
       # Ubicaciones iniciales del catálogo.
       # Aquí puedes añadir URLs a catalog-info.yaml o template.yaml
       # que quieras pre-cargar en Backstage al iniciar.
-      locations: []
+      locations:
         # Ejemplo:
         # - type: url
         #   target: https://github.com/tu-usuario/tu-repo/blob/main/template.yaml

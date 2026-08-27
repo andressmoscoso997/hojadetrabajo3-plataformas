@@ -18,7 +18,6 @@ jobs:
         with:
           node-version: '20'
  
-      # npm install (no npm ci): el skeleton no incluye package-lock.json
       - name: Install dependencies
         run: npm install
  

@@ -1,0 +1,84 @@
+# =====================================================================
+# Golden Path — Microservicio Python
+# Segundo camino pavimentado de la plataforma.
+#
+# Mismo contrato que el Golden Path de NodeJS (2 parámetros, 3 pasos),
+# distinto skeleton. solo por probar :)
+# =====================================================================
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+
+metadata:
+  name: microservicio-python
+  title: "Microservicio Python"
+  description: >
+    Golden Path para crear un microservicio Python con FastAPI,
+    publicarlo en GitHub y registrarlo en el Software Catalog.
+  tags:
+    - python
+    - fastapi
+    - microservicio
+    - golden-path
+
+spec:
+  owner: group:default/platform-team
+  type: service
+
+  parameters:
+    - title: "Información del Microservicio"
+      required:
+        - serviceName
+        - owner
+      properties:
+        serviceName:
+          title: "Nombre del Microservicio"
+          type: string
+          description: "Minúsculas, números y guiones. Ej: reportes-api"
+          maxLength: 50
+          pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
+          ui:autofocus: true
+
+        owner:
+          title: "Propietario (Owner)"
+          type: string
+          description: "Equipo o usuario responsable del microservicio"
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: [Group, User]
+
+  steps:
+    - id: fetchBase
+      name: "Descargar y parametrizar el skeleton"
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          serviceName: ${{ parameters.serviceName }}
+          owner: ${{ parameters.owner }}
+          repoOwner: andressmoscoso997
+
+    - id: publish
+      name: "Publicar en GitHub"
+      action: publish:github
+      input:
+        repoUrl: github.com?owner=andressmoscoso997&repo=${{ parameters.serviceName }}
+        description: "Microservicio Python ${{ parameters.serviceName }} generado con el Golden Path"
+        repoVisibility: public
+        defaultBranch: main
+
+    - id: register
+      name: "Registrar en el Software Catalog"
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: "/catalog-info.yaml"
+
+  output:
+    links:
+      - title: "Ver repositorio en GitHub"
+        url: ${{ steps.publish.output.remoteUrl }}
+        icon: github
+      - title: "Ver en el Software Catalog"
+        entityRef: ${{ steps.register.output.entityRef }}
+        icon: catalog

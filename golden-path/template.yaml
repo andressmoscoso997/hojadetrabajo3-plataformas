@@ -1,0 +1,138 @@
+# =====================================================================
+# Golden Path — Microservicio NodeJS
+# Hoja de trabajo No. 3 — Arquitectura de Plataformas
+#
+# Base entregada por el curso, completada con la investigación de la Fase 2.
+# Cada TODO resuelto queda documentado con el porqué de la decisión.
+# =====================================================================
+
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+
+metadata:
+  name: microservicio-nodejs
+  title: "Microservicio NodeJS — Seguro por Defecto"
+  description: >
+    Golden Path para crear un nuevo microservicio NodeJS con estructura base,
+    publicarlo en tu repositorio de GitHub y registrarlo en el Software Catalog.
+  tags:
+    - nodejs
+    - microservicio
+    - golden-path
+  annotations:
+    # Enlaza el template con el código fuente de la plantilla en GitHub.
+    backstage.io/source-location: url:https://github.com/andressmoscoso997/hojadetrabajo3-plataformas/tree/main/golden-path/
+
+spec:
+  # Dueño del TEMPLATE, no del microservicio generado.
+  owner: group:default/platform-team
+  type: service
+
+  # ===================================================================
+  # PARAMETERS: el formulario que verá el desarrollador que ejecuta el template.
+  # ===================================================================
+  parameters:
+    - title: "Información del Microservicio"
+      required:
+        - serviceName
+        - owner
+      properties:
+        serviceName:
+          title: "Nombre del Microservicio"
+          type: string
+          description: >
+            Nombre único del microservicio. Debe estar en minúsculas,
+            sin espacios ni caracteres especiales. Ejemplo: pagos-service.
+          # TODO 2 (resuelto):
+          #   a) maxLength limita la longitud del string.
+          #   b) pattern aplica una expresión regular. La usada obliga a
+          #      empezar y terminar en [a-z0-9] y permite guiones solo como
+          #      separadores internos: prohíbe mayúsculas, espacios, guion
+          #      inicial/final y guiones dobles.
+          maxLength: 50
+          pattern: '^[a-z0-9]+(-[a-z0-9]+)*$'
+          ui:autofocus: true
+          ui:help: "Usa minúsculas, números y guiones. Ej: mi-nuevo-servicio"
+
+        owner:
+          title: "Propietario (Owner)"
+          type: string
+          description: >
+            El equipo o usuario responsable de este microservicio.
+            Debe ser una entidad válida del Software Catalog.
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: [Group, User]
+          ui:help: "Selecciona el equipo o usuario propietario del servicio"
+
+  # ===================================================================
+  # STEPS: las acciones automatizadas del scaffolder.
+  # ===================================================================
+  steps:
+    # -----------------------------------------------------------------
+    # PASO 1: Descargar y parametrizar el skeleton del microservicio.
+    # -----------------------------------------------------------------
+    - id: fetch-base
+      name: "Descargar y parametrizar el skeleton"
+      action: fetch:template
+      input:
+        url: ./skeleton
+        copyWithoutTemplating:
+          - .github/workflows/*
+        values:
+          serviceName: ${{ parameters.serviceName }}
+          owner: ${{ parameters.owner }}
+          repoOwner: andressmoscoso997
+
+    # -----------------------------------------------------------------
+    # PASO 2: Publicar el código en un repositorio de GitHub.
+    # -----------------------------------------------------------------
+    - id: publish-github
+      name: "Publicar en GitHub"
+      action: publish:github
+      input:
+        repoUrl: github.com?owner=andressmoscoso997&repo=${{ parameters.serviceName }}
+        description: "Microservicio ${{ parameters.serviceName }} generado con el Golden Path de la plataforma"
+        repoVisibility: public
+        defaultBranch: main
+        protectDefaultBranch: true
+        requiredApprovingReviewCount: 1
+        requiredStatusCheckContexts:
+          - build-and-test
+        requiredConversationResolution: true
+
+    # -----------------------------------------------------------------
+    # PASO 3: Registrar el componente en el Software Catalog.
+    # -----------------------------------------------------------------
+    - id: register-catalog
+      name: "Registrar en el Software Catalog"
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish-github'].output.repoContentsUrl }}
+        catalogInfoPath: "/catalog-info.yaml"
+
+  # ===================================================================
+  # OUTPUT: información útil para el usuario al finalizar.
+  # ===================================================================
+  output:
+    links:
+      - title: "Ver repositorio en GitHub"
+        url: ${{ steps['publish-github'].output.remoteUrl }}
+        icon: github
+
+      - title: "Ver en el Software Catalog"
+        entityRef: ${{ steps['register-catalog'].output.entityRef }}
+        icon: catalog
+
+    text:
+      - title: "Siguientes pasos"
+        content: |
+          Tu microservicio **${{ parameters.serviceName }}** ya está listo.
+
+          ```bash
+          git clone ${{ steps['publish-github'].output.remoteUrl }}
+          cd ${{ parameters.serviceName }}
+          npm install && npm start
+          curl http://localhost:3000/health
+          ```

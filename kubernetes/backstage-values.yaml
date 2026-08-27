@@ -1,0 +1,183 @@
+backstage:
+  appConfig:
+    app:
+      title: "Portal de Plataforma — ARTI-4219"
+      baseUrl: http://localhost
+      packages: all
+
+      # Configuración declarativa de extensiones del Frontend
+      extensions:
+        - page:catalog:
+            config:
+              path: /
+        - home-page-widget:home/toolkit:
+            config:
+              tools:
+                - url: https://backstage.io/docs
+                  label: Docs
+                  icon: docs
+                - url: https://github.com/backstage/backstage
+                  label: GitHub
+                  icon: github
+                - url: https://github.com/backstage/backstage/blob/master/CONTRIBUTING.md
+                  label: Contributing
+                  icon: docs
+                - url: https://backstage.io/plugins
+                  label: Plugins Directory
+                  icon: kind:component
+                - url: https://github.com/backstage/backstage/issues/new/choose
+                  label: Submit New Issue
+                  icon: github
+        - home-page-widget:home/world-clock:
+            config:
+              clockConfigs:
+                - label: NYC
+                  timeZone: America/New_York
+                - label: UTC
+                  timeZone: UTC
+                - label: STO
+                  timeZone: Europe/Stockholm
+                - label: TYO
+                  timeZone: Asia/Tokyo
+        - page:home:
+            config:
+              defaultConfig:
+                - component: HomePageSearchBar
+                  column: 0
+                  row: 0
+                  width: 12
+                  height: 2
+                  deletable: false
+                - component: GettingStarted
+                  column: 0
+                  row: 1
+                  width: 4
+                  height: 11
+                - component: HomePageStarredEntities
+                  column: 4
+                  row: 2
+                  width: 4
+                  height: 4
+                - component: HomePageRandomJoke
+                  column: 8
+                  row: 2
+                  width: 4
+                  height: 4
+                - component: HomePageToolkit
+                  column: 4
+                  row: 6
+                  width: 4
+                  height: 3
+                - component: HomePageWorldClock
+                  column: 8
+                  row: 6
+                  width: 4
+                  height: 3
+                - component: HomePageMostVisited
+                  column: 4
+                  row: 9
+                  width: 4
+                  height: 4
+                - component: HomePageRecentlyVisited
+                  column: 8
+                  row: 9
+                  width: 4
+                  height: 4
+  
+    organization:
+      name: My Company
+  
+    backend:
+      baseUrl: http://localhost
+      listen:
+        port: 7007
+      csp:
+        connect-src: ["'self'", 'http:', 'https:']
+      cors:
+        origin: http://localhost
+        methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+        credentials: true
+      database:
+        # Usamos SQLite en memoria para simplificar el ambiente local.
+        client: better-sqlite3
+        connection: ':memory:'
+      actions:
+        pluginSources:
+          - auth
+          - catalog
+          - scaffolder
+
+    auth:
+      environment: development
+      providers:
+        guest:
+          dangerouslyAllowOutsideDevelopment: true
+      clientIdMetadataDocuments:
+        enabled: false
+
+    # -------------------------------------------------------
+    # Integración con GitHub.
+    # El token se inyecta desde la variable de entorno GITHUB_TOKEN
+    # que pasamos con --set al momento de 'helm install'.
+    # -------------------------------------------------------
+    integrations:
+      github:
+        - host: github.com
+          token: ${GITHUB_TOKEN}
+
+    catalog:
+      rules:
+        - allow:
+            - Component
+            - System
+            - API
+            - Resource
+            - Location
+            - Template
+            - User
+            - Group
+      # Ubicaciones iniciales del catálogo.
+      # Aquí puedes añadir URLs a catalog-info.yaml o template.yaml
+      # que quieras pre-cargar en Backstage al iniciar.
+      locations: []
+        # Ejemplo:
+        # - type: url
+        #   target: https://github.com/tu-usuario/tu-repo/blob/main/template.yaml
+
+    kubernetes:
+      serviceLocatorMethod:
+        type: 'multiTenant'
+      clusterLocatorMethods:
+        - type: 'config'
+          clusters: []
+
+    techdocs:
+      builder: 'local'
+      generator:
+        runIn: 'local'
+      publisher:
+        type: 'local'
+
+    permission:
+      enabled: true
+
+    mcpActions:
+      name: 'My Company Backstage'
+      description: 'Tools for managing your software catalog, creating new services from templates, and exploring your developer portal'    
+
+
+    scaffolder:
+      defaultCommitMessage: "feat: scaffold new service via Backstage Golden Path"
+
+service:
+  type: NodePort
+  ports:
+    backend: 7007
+  nodePorts:
+    backend: "30000"
+
+postgresql:
+  enabled: false
+
+ingress:
+  enabled: false

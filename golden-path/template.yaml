@@ -129,9 +129,9 @@ spec:
           npm install && npm start
           curl http://localhost:3000/health
           Si no funciona usar docker con los siguientes comandos:
-          cd carpeta-del-microservicio
-          docker build -t nombre-de-la-imagen .
-          docker run -p 3000:3000 nombre-de-la-imagen
+          cd ${{ parameters.serviceName }}
+          docker build -t ${{ parameters.serviceName }} .
+          docker run -p 3000:3000 ${{ parameters.serviceName }}
           curl http://localhost:3000/health
           curl http://localhost:3000/
           ```

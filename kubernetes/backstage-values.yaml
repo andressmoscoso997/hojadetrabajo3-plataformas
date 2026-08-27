@@ -127,15 +127,7 @@ backstage:
 
     catalog:
       rules:
-        - allow:
-            - Component
-            - System
-            - API
-            - Resource
-            - Location
-            - Template
-            - User
-            - Group
+       - allow: [Component, System, API, Resource, Location, Template, User, Group]
       # Ubicaciones iniciales del catálogo.
       # Aquí puedes añadir URLs a catalog-info.yaml o template.yaml
       # que quieras pre-cargar en Backstage al iniciar.
